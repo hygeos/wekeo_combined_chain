@@ -52,6 +52,9 @@ def get_combined_product(*,
     if s5p_pca_product_path is not None and day is not None:
         raise ValueError("Only one of s5p_pca_product_path or day can be provided.")
 
+    if not s5p_pca_product_path and not (iasi_l3 or frp_slstr_l3):
+        raise ValueError("At least one of the products must be included. Provide a path to the S5P_PCA product or set iasi_l3 or frp_slstr_l3 to True.")
+
     if s5p_pca_product_path:
         
         # --------------------------------------------
