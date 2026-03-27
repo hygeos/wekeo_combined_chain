@@ -1,5 +1,5 @@
 [project]
-name = "wekeo_combined_test"
+name = "wekeo_combined_chain"
 version = "0.1.0"
 description = ""
 requires-python = ">= 3.10"
@@ -27,7 +27,7 @@ channels = ["conda-forge"]
 platforms = ["linux-64"]
 
 [tool.pixi.pypi-dependencies]
-wekeo_combined_test = { path = ".", editable = true, extras = ["git"] }
+wekeo_combined_chain = { path = ".", editable = true, extras = ["git"] }
 
 [tool.pixi.tasks]
 tests = "pytest tests/"

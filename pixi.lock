@@ -2148,9 +2148,9 @@ packages:
   size: 71550
   timestamp: 1770634638503
 - pypi: ./
-  name: wekeo-combined-test
+  name: wekeo-combined-chain
   version: 0.1.0
-  sha256: 560eb449d0ed89dd99baa1372edc437391453180357e92d153187a3ac5046c5c
+  sha256: d59bc8d0a7bb757691b9c5eba7aca146a39f71d5b5f4f3454cd3e56cf67cfb61
   requires_dist:
   - wekeo-frp-l3[git] @ git+https://github.com/hygeos/wekeo_frp_l3
   - wekeo-iasi-l3[git] @ git+ssh://git@github.com/hygeos/wekeo_iasi_l3

@@ -8,7 +8,7 @@ from wekeo_frp_l3 import frp_slstr
 from wekeo_s5p_pca_l3 import s5p_pca
 from wekeo_iasi_l3 import iasi
 
-from wekeo_combined_test.hygeos_core import env
+from wekeo_combined_chain.hygeos_core import env
 
 
 def get_combined_product(*, 
