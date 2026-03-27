@@ -6,7 +6,7 @@ requires-python = ">= 3.10"
 authors = [{name = "HYGEOS", email = "contact@hygeos.com"}]
 dependencies = [
     "wekeo-frp-l3[git] @ git+https://github.com/hygeos/wekeo_frp_l3", 
-    "wekeo-iasi-l3[git] @ git+ssh://git@github.com/hygeos/wekeo_iasi_l3", 
+    "wekeo-iasi-l3[git] @ git+https://github.com/hygeos/wekeo_iasi_l3", 
     "wekeo-s5p-pca-l3[git] @ git+https://github.com/hygeos/wekeo_s5p_pca_l3", 
     "xarray"]
 

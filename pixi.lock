@@ -158,7 +158,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/16/e1/3079a9ff9b8e11b846c6ac5c8b5bfb7ff225eee721825310c91b3b50304f/tqdm-4.67.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl
       - pypi: git+https://github.com/hygeos/wekeo_frp_l3#9a81e28c3deb45ca9928d32a8225a0efae7b02c8
-      - pypi: git+ssh://git@github.com/hygeos/wekeo_iasi_l3#e68e323608cdf5cfea7b6357e67e31e6c299c344
+      - pypi: git+https://github.com/hygeos/wekeo_iasi_l3#e68e323608cdf5cfea7b6357e67e31e6c299c344
       - pypi: git+https://github.com/hygeos/wekeo_s5p_pca_l3#c272c144460c3c1b81ecf6c5f3a81878bbd47adb
       - pypi: ./
 packages:
@@ -2150,10 +2150,10 @@ packages:
 - pypi: ./
   name: wekeo-combined-chain
   version: 0.1.0
-  sha256: d59bc8d0a7bb757691b9c5eba7aca146a39f71d5b5f4f3454cd3e56cf67cfb61
+  sha256: 7bd6ffe22b7b64f94d1a02bb3687beb7caae71765e2ed430d523200bc51a6963
   requires_dist:
   - wekeo-frp-l3[git] @ git+https://github.com/hygeos/wekeo_frp_l3
-  - wekeo-iasi-l3[git] @ git+ssh://git@github.com/hygeos/wekeo_iasi_l3
+  - wekeo-iasi-l3[git] @ git+https://github.com/hygeos/wekeo_iasi_l3
   - wekeo-s5p-pca-l3[git] @ git+https://github.com/hygeos/wekeo_s5p_pca_l3
   - xarray
   requires_python: '>=3.10'
@@ -2170,7 +2170,7 @@ packages:
   - python-dotenv
   - netcdf4
   requires_python: '>=3.10'
-- pypi: git+ssh://git@github.com/hygeos/wekeo_iasi_l3#e68e323608cdf5cfea7b6357e67e31e6c299c344
+- pypi: git+https://github.com/hygeos/wekeo_iasi_l3#e68e323608cdf5cfea7b6357e67e31e6c299c344
   name: wekeo-iasi-l3
   version: 0.1.1
   requires_dist:

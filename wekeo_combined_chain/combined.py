@@ -9,14 +9,16 @@ from wekeo_s5p_pca_l3 import s5p_pca
 from wekeo_iasi_l3 import iasi
 
 from wekeo_combined_chain.hygeos_core import env
-
+from wekeo_combined_chain import config
 
 def get_combined_product(*, 
     s5p_pca_product_path: Path|None=None, 
     day: date|None=None,
     frp_slstr_l3: bool = True,
     iasi_l3: bool = True,
-    width: int = 3272 
+    width: int = 3272,
+    save_result=True,
+    use_cache=True
 ) -> xr.Dataset:
     
     """
@@ -43,8 +45,9 @@ def get_combined_product(*,
     WIDTH = width # resolution of output grid
     
     # storage objects for merged dataset
-    attrs = {"content": []} 
+    attrs = {} 
     products = []
+    content = []
 
     if s5p_pca_product_path is None and day is None:
         raise ValueError("Either s5p_pca_product_path or day must be provided.")
@@ -54,6 +57,18 @@ def get_combined_product(*,
 
     if not s5p_pca_product_path and not (iasi_l3 or frp_slstr_l3):
         raise ValueError("At least one of the products must be included. Provide a path to the S5P_PCA product or set iasi_l3 or frp_slstr_l3 to True.")
+
+
+    if s5p_pca_product_path: content.append("s5p_pca")
+    if iasi_l3: content.append("iasi")
+    if frp_slstr_l3: content.append("frp_slstr")
+    
+    version = "v1"
+
+    outdir = config.gridded_combined_dir
+    if not outdir.exists():
+        raise ValueError(f"Output directory {outdir} does not exist.")
+        
 
     if s5p_pca_product_path:
         
@@ -79,11 +94,16 @@ def get_combined_product(*,
         
         products.append(ds_s5p_pca)
         attrs["s5p_pca"] = str(ds_s5p_pca.attrs) # str to serialize
-        attrs["content"].append("s5p_pca")
 
     # If day is provided, use it as the date for the products
     if day:
         date = day
+    
+    outfile = outdir / f"wekeo_l3_combined__{ds.attrs['date']}__{content}__{version}.nc"
+    if outfile.exists() and use_cache:
+        print(f"Combined product already exists at {outfile}. Loading from file...")
+        ds_combined = xr.open_dataset(outfile)
+        return ds_combined
     
     if iasi_l3:
     
@@ -107,7 +127,6 @@ def get_combined_product(*,
         
         products.append(ds_iasi)
         attrs["iasi"] = str(ds_iasi.attrs) # str to serialize
-        attrs["content"].append("iasi")
     
     if frp_slstr_l3:
             
@@ -130,7 +149,6 @@ def get_combined_product(*,
         
         products.append(ds_frp_slstr)
         attrs["frp_slstr"] = str(ds_frp_slstr.attrs) # str to serialize
-        attrs["content"].append("frp_slstr")
     
     # merge the three datasets
     ds_combined = xr.merge(products, compat="no_conflicts")
@@ -139,41 +157,24 @@ def get_combined_product(*,
         "date": date.strftime("%Y-%m-%d"),
     }
     
+
+    if save_result:
+        with tempfile.NamedTemporaryFile(suffix='.nc', dir=outfile.parent, delete=False) as f:
+            tmp_path = Path(f.name)
+
+        try:
+            ds.to_netcdf(tmp_path)
+            tmp_path.replace(outfile)  # Atomic rename
+            print(f"Saved combined dataset to {outfile}")
+            
+            return outfile
+        except Exception:
+            tmp_path.unlink(missing_ok=True)
+            raise
+
+
     return ds_combined
 
-
-def save_combined_product(ds: xr.Dataset, output_dir: Path=None) -> None:
-    """
-    Save the combined dataset to a NetCDF file.
-    Parameters
-    ----------
-    ds : xr.Dataset
-        Combined dataset to save.
-    output_path : Path
-        Path to save the NetCDF file.
-    """
-
-    version = "v1"
-
-    outdir = output_dir
-    if outdir is None:
-        outdir = env.getdir("OUTPUT_DIR")
     
-    if not outdir.exists():
-        raise ValueError(f"Output directory {outdir} does not exist.")
-        
-    content = "_".join(ds.attrs["content"])
-    outfile = outdir / f"wekeo_l3_combined__{ds.attrs['date']}__{content}__{version}.nc"
-    
-    print(f"Saving combined dataset ...")
-    
-    with tempfile.NamedTemporaryFile(suffix='.nc', dir=outfile.parent, delete=False) as f:
-        tmp_path = Path(f.name)
 
-    try:
-        ds.to_netcdf(tmp_path)
-        tmp_path.replace(outfile)  # Atomic rename
-        print(f"Saved combined dataset to {outfile}")
-    except Exception:
-        tmp_path.unlink(missing_ok=True)
-        raise
+    
