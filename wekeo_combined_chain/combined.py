@@ -165,7 +165,7 @@ def save_combined_product(ds: xr.Dataset, output_dir: Path=None) -> None:
     content = "_".join(ds.attrs["content"])
     outfile = outdir / f"wekeo_l3_combined__{ds.attrs['date']}__{content}__{version}.nc"
     
-    print(f"Saving combined dataset to {outfile}...")
+    print(f"Saving combined dataset ...")
     
     with tempfile.NamedTemporaryFile(suffix='.nc', dir=outfile.parent, delete=False) as f:
         tmp_path = Path(f.name)
@@ -173,6 +173,7 @@ def save_combined_product(ds: xr.Dataset, output_dir: Path=None) -> None:
     try:
         ds.to_netcdf(tmp_path)
         tmp_path.replace(outfile)  # Atomic rename
+        print(f"Saved combined dataset to {outfile}")
     except Exception:
         tmp_path.unlink(missing_ok=True)
         raise
