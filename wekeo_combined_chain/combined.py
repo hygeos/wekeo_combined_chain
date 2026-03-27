@@ -99,7 +99,7 @@ def get_combined_product(*,
     if day:
         date = day
     
-    outfile = outdir / f"wekeo_l3_combined__{ds.attrs['date']}__{content}__{version}.nc"
+    outfile = outdir / f"wekeo_l3_combined__{date.strftime('%Y-%m-%d')}__{content}__{version}.nc"
     if outfile.exists() and use_cache:
         print(f"Combined product already exists at {outfile}. Loading from file...")
         ds_combined = xr.open_dataset(outfile)
@@ -163,7 +163,7 @@ def get_combined_product(*,
             tmp_path = Path(f.name)
 
         try:
-            ds.to_netcdf(tmp_path)
+            ds_combined.to_netcdf(tmp_path)
             tmp_path.replace(outfile)  # Atomic rename
             print(f"Saved combined dataset to {outfile}")
             
