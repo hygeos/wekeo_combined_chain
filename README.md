@@ -11,7 +11,9 @@ Wekeo Use Case Combined Processing Chain
 
 ## Installation for Users
 
+```bash
 pip install ".[git]"
+```
 
 ## Installation for Development
 
