@@ -9,23 +9,83 @@ Wekeo Use Case Combined Processing Chain
 
 ## Preview
 
----
+## Installation for Users
+
+pip install ".[git]"
+
+## Installation for Development
+
+Made specifically for collaboration with Spascia.
+
+### Environments
+
+Several environment management methods are supported. Choose one of the following:
+
+#### Virtual Environments (venv)
+
+Create an empty virtual environment and activate it:
+
+```bash
+python -m venv .venv
+
+# For macOS/Linux
+source .venv/bin/activate
+```
+
+#### Conda Environments
+
+Create a new conda environment (specify your Python version, e.g., `3.10`) and activate it:
+
+```bash
+conda create -n wekeo_env python=3.10 pip
+conda activate wekeo_env
+```
 
 ## Installation
 
-### Using pip
+Once your environment is set up and activated, in a clean folder, proceed in the following order
+
+### 1. Clone the main repository
+
 ```bash
-pip install -e .
+git clone https://github.com/hygeos/wekeo_combined_chain.git
 ```
 
-### Using pixi
+### 2. Clone dependent repositories
+
+Clone the specific data chain repositories into the project directory:
+
 ```bash
-pixi install
+git clone https://github.com/hygeos/wekeo_frp_l3
+git clone https://github.com/hygeos/wekeo_iasi_l3
+git clone https://github.com/hygeos/wekeo_s5p_pca_l3
 ```
 
-### Prerequisites
+### 3. Install packages in editable mode
 
-#### WEKEO HDA Credentials
+Install the dependencies so that changes to the code are reflected immediately:
+
+```bash
+pip install -e wekeo_combined_chain
+pip install -e wekeo_frp_l3
+pip install -e wekeo_iasi_l3
+pip install -e wekeo_s5p_pca_l3
+```
+
+### Resulting folder structure
+
+```
+├── wekeo_combined_chain
+├── wekeo_frp_l3
+├── wekeo_iasi_l3
+└── wekeo_s5p_pca_l3
+```
+
+Where each folder is installed as 'editable' in the python's environment, meaning that any changes inside will be reflected. 
+
+## Prerequisites
+
+### WEKEO HDA Credentials
 You need to set up your WEKEO Harmonized Data Access (HDA) credentials in a file `~/.hdarc`
 
 Required syntax:
@@ -35,7 +95,7 @@ password:your_password
 ```
 
 
-#### Environment Variables
+### Environment Variables
 Create a `.env` file in the project root directory with the following environment variables: DIR_ANCILLARY, OUTPUT_DIR
 
 Example `.env` file:
