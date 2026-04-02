@@ -63,7 +63,7 @@ git clone https://github.com/hygeos/wekeo_s5p_pca_l3
 
 ### 3. Install packages in editable mode
 
-Install the dependencies so that changes to the code are reflected immediately:
+Install the chains in the python env as editable:
 
 ```bash
 pip install -e wekeo_combined_chain
@@ -100,8 +100,8 @@ Create a `.env` file in the project root directory with the following environmen
 
 Example `.env` file:
 ```
-DIR_ANCILLARY=/mnt/ceph/proj/WEKEO/ancillary
-OUTPUT_DIR=/mnt/ceph/proj/WEKEO/outputs/
+DIR_ANCILLARY=/data/WEKEO/ancillary
+OUTPUT_DIR=/data/WEKEO/outputs/
 ```
 
 These variables define paths for storing downloaded data and generated outputs. The directories will be created automatically if they don't exist.
@@ -118,9 +118,18 @@ This notebook performs the total wekeo use case processing chain
 - frp slstr l3 (+ download)
 - iasi l3 (+ download)
 
-
 can be run in different configurations depending on the parameters
-
     from wekeo_combined_chain.combined import get_combined_product
-
     ds = get_combined_product(...) # run the processing chain, cf notebook for more info
+
+### Cache
+
+Most of the computations include a parameter **use_cache** that will bypass the computation if the result is already present (based on the parameters). 
+So if you intend to modify the computations and test the result it is important to set **use_cache** to **False**. 
+
+### FRP download issues
+
+As of 02-04-2026 the download times for FRP have dramatically increased up to several hours for a single day.
+This is an issue on the server, we have contacted the platform about it, they are investigating it. There is unfortunately not much more we can do about it.
+But since the chains can also use download cache, you can copy it from someone who already downloaded the source files, and recompute the products yourself. 
+
