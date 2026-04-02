@@ -94,10 +94,13 @@ def get_combined_product(*,
         
         products.append(ds_s5p_pca)
         attrs["s5p_pca"] = str(ds_s5p_pca.attrs) # str to serialize
-
-    # If day is provided, use it as the date for the products
-    if day:
-        date = day
+    
+    else: 
+        # If day is provided, use it as the date for the products
+        if day:
+            date = day
+        else:
+            raise ValueError("Either s5p_pca_product_path or day must be provided.")
     
     outfile = outdir / f"wekeo_l3_combined__{date.strftime('%Y-%m-%d')}__{content}__{version}.nc"
     if outfile.exists() and use_cache:
@@ -167,7 +170,7 @@ def get_combined_product(*,
             tmp_path.replace(outfile)  # Atomic rename
             print(f"Saved combined dataset to {outfile}")
             
-            return outfile
+            return xr.open_dataset(outfile)
         except Exception:
             tmp_path.unlink(missing_ok=True)
             raise
