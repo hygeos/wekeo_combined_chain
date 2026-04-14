@@ -7,13 +7,16 @@ import xarray as xr
 from wekeo_frp_l3 import frp_slstr
 from wekeo_s5p_pca_l3 import s5p_pca
 from wekeo_iasi_l3 import iasi
+from wekeo_plumes_post_process.plumes import apply_plume_detection
+
 
 from wekeo_combined_chain.hygeos_core import env
 from wekeo_combined_chain import config
 
 def get_combined_product(*, 
-    s5p_pca_product_path: Path|None=None, 
+    s5p_pca_product: Path|xr.Dataset|None=None, 
     day: date|None=None,
+    plumes = True,
     frp_slstr_l3: bool = True,
     iasi_l3: bool = True,
     width: int = 3272,
@@ -25,7 +28,7 @@ def get_combined_product(*,
     Get the combined product of S5P_PCA, IASI, and FRP SLSTR Level 3 datasets.
     Parameters
     ----------
-    s5p_pca_product_path : Path, optional
+    s5p_pca_product : Path, optional
         Path to the S5P_PCA Level 3 product. If not provided, the product will be retrieved based on the provided day.
     day : date, optional
         Day for which to retrieve the products. If not provided, the S5P_PCA product will be bypassed and only the IASI and FRP SLSTR products will be retrieved if their respective flags are set to True.
@@ -49,17 +52,17 @@ def get_combined_product(*,
     products = []
     content = []
 
-    if s5p_pca_product_path is None and day is None:
-        raise ValueError("Either s5p_pca_product_path or day must be provided.")
+    if s5p_pca_product is None and day is None:
+        raise ValueError("Either s5p_pca_product or day must be provided.")
     
-    if s5p_pca_product_path is not None and day is not None:
-        raise ValueError("Only one of s5p_pca_product_path or day can be provided.")
+    if s5p_pca_product is not None and day is not None:
+        raise ValueError("Only one of s5p_pca_product or day can be provided.")
 
-    if not s5p_pca_product_path and not (iasi_l3 or frp_slstr_l3):
+    if not s5p_pca_product and not (iasi_l3 or frp_slstr_l3):
         raise ValueError("At least one of the products must be included. Provide a path to the S5P_PCA product or set iasi_l3 or frp_slstr_l3 to True.")
 
 
-    if s5p_pca_product_path: content.append("s5p_pca")
+    if s5p_pca_product: content.append("s5p_pca")
     if iasi_l3: content.append("iasi")
     if frp_slstr_l3: content.append("frp_slstr")
     
@@ -70,7 +73,7 @@ def get_combined_product(*,
         raise ValueError(f"Output directory {outdir} does not exist.")
         
 
-    if s5p_pca_product_path:
+    if s5p_pca_product:
         
         # --------------------------------------------
         # Get the S5P_PCA Level 3 product
@@ -78,7 +81,7 @@ def get_combined_product(*,
         
         print("Getting S5P_PCA Level 3 product...")
         
-        input_file = s5p_pca_product_path
+        input_file = s5p_pca_product
         ds_s5p_pca = s5p_pca.get_gridded_s5p_pca_l3(
             dataset=input_file,
             width=WIDTH,
@@ -89,18 +92,26 @@ def get_combined_product(*,
 
         date = datetime.strptime(ds_s5p_pca.attrs["date"], "%Y-%m-%d")
         
+        
+        if plumes:
+            print("Applying plume detection to S5P_PCA product...")
+            ds_s5p_pca = apply_plume_detection(ds_s5p_pca)
+            
         # prefix all data_vars with "s5p_pca_"
         ds_s5p_pca = ds_s5p_pca.rename({var: f"s5p_pca__{var}" for var in ds_s5p_pca.data_vars if var not in ds_s5p_pca.coords}) 
-        
+            
         products.append(ds_s5p_pca)
         attrs["s5p_pca"] = str(ds_s5p_pca.attrs) # str to serialize
-    
+        
+            
     else: 
+        if plumes:
+            raise ValueError("Plume detection can only be applied if s5p_pca_product is provided.")
         # If day is provided, use it as the date for the products
         if day:
             date = day
         else:
-            raise ValueError("Either s5p_pca_product_path or day must be provided.")
+            raise ValueError("Either s5p_pca_product or day must be provided.")
     
     outfile = outdir / f"wekeo_l3_combined__{date.strftime('%Y-%m-%d')}__{content}__{version}.nc"
     if outfile.exists() and use_cache:

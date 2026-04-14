@@ -11,9 +11,10 @@ dependencies = [
 [project.optional-dependencies]
 git = [
     # insert github dependencies
-    "wekeo-frp-l3[git] @ git+https://github.com/hygeos/wekeo_frp_l3", 
-    "wekeo-iasi-l3[git] @ git+https://github.com/hygeos/wekeo_iasi_l3", 
-    "wekeo-s5p-pca-l3[git] @ git+https://github.com/hygeos/wekeo_s5p_pca_l3", 
+    "wekeo-frp-l3[git] @ git+https://github.com/hygeos/wekeo_frp_l3@dev", 
+    "wekeo-iasi-l3[git] @ git+https://github.com/hygeos/wekeo_iasi_l3@dev", 
+    "wekeo-s5p-pca-l3[git] @ git+https://github.com/hygeos/wekeo_s5p_pca_l3@dev", 
+    "wekeo_plumes_post_process[git] @ git+https://github.com/hygeos/wekeo_plumes_post_process"
 ]
 
 [build-system]
@@ -29,6 +30,7 @@ platforms = ["linux-64"]
 
 [tool.pixi.pypi-dependencies]
 wekeo_combined_chain = { path = ".", editable = true, extras = ["git"] }
+
 
 [tool.pixi.tasks]
 tests = "pytest tests/"
