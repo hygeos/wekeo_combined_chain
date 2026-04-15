@@ -61,6 +61,7 @@ Clone the specific data chain repositories into the project directory:
 git clone https://github.com/hygeos/wekeo_frp_l3
 git clone https://github.com/hygeos/wekeo_iasi_l3
 git clone https://github.com/hygeos/wekeo_s5p_pca_l3
+git clone https://github.com/hygeos/wekeo_plumes_post_process
 ```
 
 ### 3. Install packages in editable mode
@@ -72,6 +73,7 @@ pip install -e wekeo_combined_chain
 pip install -e wekeo_frp_l3
 pip install -e wekeo_iasi_l3
 pip install -e wekeo_s5p_pca_l3
+pip install -e wekeo_plumes_post_process
 ```
 
 ### Resulting folder structure
@@ -80,7 +82,9 @@ pip install -e wekeo_s5p_pca_l3
 ├── wekeo_combined_chain
 ├── wekeo_frp_l3
 ├── wekeo_iasi_l3
-└── wekeo_s5p_pca_l3
+├── wekeo_s5p_pca_l3
+└── wekeo_plumes_post_process
+
 ```
 
 Where each folder is installed as 'editable' in the python's environment, meaning that any changes inside will be reflected. 
