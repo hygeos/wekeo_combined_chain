@@ -15,6 +15,14 @@ Wekeo Use Case Combined Processing Chain
 pip install ".[git]"
 ```
 
+### Install coda specifically (important)
+
+#### With conda
+
+```
+conda install coda
+```
+
 ## Installation for Development
 
 Made specifically for collaboration with Spascia.
