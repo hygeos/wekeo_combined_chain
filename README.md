@@ -76,6 +76,16 @@ pip install -e wekeo_s5p_pca_l3
 pip install -e wekeo_plumes_post_process
 ```
 
+
+### 4. Install the coda library for iasi
+
+#### With conda
+
+```
+conda install coda
+```
+
+
 ### Resulting folder structure
 
 ```
