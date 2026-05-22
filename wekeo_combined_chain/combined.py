@@ -21,7 +21,9 @@ def get_combined_product(*,
     iasi_l3: bool = True,
     width: int = 3272,
     save_result=True,
-    use_cache=True
+    use_cache=True,
+    use_cache_subchains=True,
+    
 ) -> xr.Dataset:
     
     """
@@ -87,7 +89,7 @@ def get_combined_product(*,
             width=WIDTH,
             min_count=1,
             save_result=True,
-            use_cache=True,
+            use_cache=use_cache_subchains,
         )
 
         date = datetime.strptime(ds_s5p_pca.attrs["date"], "%Y-%m-%d")
@@ -133,7 +135,7 @@ def get_combined_product(*,
             variables=["INTEGRATED_CO"],
             remove_night=True,
             save_result=True,
-            use_cache=True,
+            use_cache=use_cache_subchains,
         )
         
         # prefix all data_vars with "iasi_"
@@ -155,7 +157,7 @@ def get_combined_product(*,
             width=WIDTH,
             min_count=1,
             save_result=True,
-            use_cache=True,
+            use_cache=use_cache_subchains,
         )
         
         # prefix all data_vars with "frp_slstr_"
