@@ -11,6 +11,7 @@ from wekeo_plumes_post_process.plumes import apply_plume_detection
 
 
 from wekeo_combined_chain.hygeos_core import env
+from wekeo_combined_chain.hygeos_core.monitor import Chrono
 from wekeo_combined_chain import config
 
 def get_combined_product(*, 
@@ -81,23 +82,26 @@ def get_combined_product(*,
         # Get the S5P_PCA Level 3 product
         # --------------------------------------------
         
-        print("Getting S5P_PCA Level 3 product...")
-        
-        input_file = s5p_pca_product
-        ds_s5p_pca = s5p_pca.get_gridded_s5p_pca_l3(
-            dataset=input_file,
-            width=WIDTH,
-            min_count=1,
-            save_result=True,
-            use_cache=use_cache_subchains,
-        )
+        with Chrono(name="S5P_PCA retrieval and plume detection", unit="s"):
+            print("Getting S5P_PCA Level 3 product...")
+            
+            input_file = s5p_pca_product
+            ds_s5p_pca = s5p_pca.get_gridded_s5p_pca_l3(
+                dataset=input_file,
+                width=WIDTH,
+                min_count=1,
+                save_result=True,
+                use_cache=use_cache_subchains,
+            )
 
-        date = datetime.strptime(ds_s5p_pca.attrs["date"], "%Y-%m-%d")
-        
+            date = datetime.strptime(ds_s5p_pca.attrs["date"], "%Y-%m-%d")
+            
         
         if plumes:
-            print("Applying plume detection to S5P_PCA product...")
-            ds_s5p_pca = apply_plume_detection(ds_s5p_pca)
+        
+            with Chrono(name="Plume detection", unit="s"):
+                print("Applying plume detection to S5P_PCA product...")
+                ds_s5p_pca = apply_plume_detection(ds_s5p_pca)
             
         # prefix all data_vars with "s5p_pca_"
         ds_s5p_pca = ds_s5p_pca.rename({var: f"s5p_pca__{var}" for var in ds_s5p_pca.data_vars if var not in ds_s5p_pca.coords}) 
@@ -127,16 +131,17 @@ def get_combined_product(*,
         # Get the IASI Level 3 product
         # --------------------------------------------
         
-        print("Getting IASI Level 3 product...")
-        
-        ds_iasi = iasi.get_gridded_iasi_l3(
-            day=date,
-            width=WIDTH,
-            variables=["INTEGRATED_CO"],
-            remove_night=True,
-            save_result=True,
-            use_cache=use_cache_subchains,
-        )
+        with Chrono(name="IASI L3 computation", unit="s"):
+            print("Getting IASI Level 3 product...")
+            
+            ds_iasi = iasi.get_gridded_iasi_l3(
+                day=date,
+                width=WIDTH,
+                variables=["INTEGRATED_CO"],
+                remove_night=True,
+                save_result=True,
+                use_cache=use_cache_subchains,
+            )
         
         # prefix all data_vars with "iasi_"
         ds_iasi = ds_iasi.rename({var: f"iasi__{var}" for var in ds_iasi.data_vars if var not in ds_iasi.coords})
@@ -149,17 +154,17 @@ def get_combined_product(*,
         # --------------------------------------------
         # Get the FRP SLSTR Level 3 product
         # --------------------------------------------
-        
-        print("Getting FRP SLSTR Level 3 product...")
-        
-        ds_frp_slstr = frp_slstr.get_gridded_frp_slstr_l3(
-            day=date,
-            width=WIDTH,
-            min_count=1,
-            save_result=True,
-            use_cache=use_cache_subchains,
-        )
-        
+        with Chrono(name="FRP SLSTR L3 computation", unit="s"):
+            print("Getting FRP SLSTR Level 3 product...")
+            
+            ds_frp_slstr = frp_slstr.get_gridded_frp_slstr_l3(
+                day=date,
+                width=WIDTH,
+                min_count=1,
+                save_result=True,
+                use_cache=use_cache_subchains,
+            )
+            
         # prefix all data_vars with "frp_slstr_"
         ds_frp_slstr = ds_frp_slstr.rename({var: f"frp_slstr__{var}" for var in ds_frp_slstr.data_vars if var not in ds_frp_slstr.coords})
         
