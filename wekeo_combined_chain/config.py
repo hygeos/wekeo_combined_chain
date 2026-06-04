@@ -6,3 +6,6 @@ if not output_dir.exists():
 
 gridded_combined_dir = output_dir / "gridded_combined"
 gridded_combined_dir.mkdir(parents=False, exist_ok=True)
+
+
+gridded_combined_downloaded_dir = env.getdir("DIR_DOWNLOAD_COMBINED")

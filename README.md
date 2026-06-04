@@ -126,6 +126,8 @@ Example `.env` file:
 ```
 DIR_ANCILLARY=/data/WEKEO/ancillary
 OUTPUT_DIR=/data/WEKEO/outputs/
+
+DIR_DOWNLOAD_COMBINED=/data/WEKEO/downloaded/     (used for the demo.ipynb notebook as a proxy for the S3 interfacing to come)
 ```
 
 These variables define paths for storing downloaded data and generated outputs. The directories will be created automatically if they don't exist.
