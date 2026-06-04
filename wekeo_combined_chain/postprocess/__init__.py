@@ -32,7 +32,8 @@ Typical usage
 """
 
 from .compute import compute, compute_plume_stats, build_grids
-from .plot import plot
+from .spascia_prototype_plots import plot as spascia_prototype_plot
+from . import plot
 
-__all__ = ["compute", "compute_plume_stats", "build_grids", "plot"]
+__all__ = ["compute", "compute_plume_stats", "build_grids", "spascia_prototype_plot", "plot"]
 
