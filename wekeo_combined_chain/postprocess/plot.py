@@ -129,6 +129,60 @@ def _maybe_save(fig: Figure, save_to: str | Path | None, dpi: int = 150) -> None
 # Public plot functions
 # ---------------------------------------------------------------------------
 
+def plot_plumes(
+    ds_combined: xr.Dataset,
+    ds_post: xr.Dataset,
+    date_str: str,
+    save_to: str | Path | None = None,
+    figsize: tuple[int, int] = (18, 9),
+) -> Figure:
+    """
+    Map — Plume pixels coloured by label (no FRP overlay).
+
+    Parameters
+    ----------
+    ds_combined :
+        Raw combined input dataset.
+    ds_post :
+        Output of ``postprocess.compute()``.
+    date_str :
+        Date string used in the figure title, e.g. ``"20210817"``.
+    save_to :
+        File path to save the figure. ``None`` (default) skips saving.
+    figsize :
+        Figure size in inches.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    extent = _extent_from_ds(ds_combined)
+    _, _, lat_2d, lon_2d, labels_2d, _, _ = _extract_grids(
+        ds_combined, ds_post)
+
+    fig, ax = _base_map(extent, figsize=figsize)
+
+    num_plumes = np.unique(labels_2d)
+    num_plumes = num_plumes[num_plumes != 0]
+    for i, lbl in enumerate(num_plumes):
+        mask = labels_2d == lbl
+        ax.scatter(lon_2d[mask], lat_2d[mask],
+                   s=2, color=_COLORS60[i % len(_COLORS60)], alpha=0.6,
+                   transform=ccrs.PlateCarree(), zorder=3)
+
+    ax.scatter([], [], s=6, color="steelblue", alpha=0.6,
+               transform=ccrs.PlateCarree(), label="Plumes S5P-PCA")
+    ax.set_title(
+        f"Plumes S5P-PCA ({len(num_plumes)}) — {date_str}",
+        fontsize=16,
+    )
+    ax.legend(loc="lower left", fontsize=14, markerscale=2)
+
+    _maybe_save(fig, save_to)
+    plt.close(fig)
+    return fig
+
+
 def plot_plumes_frp(
     ds_combined: xr.Dataset,
     ds_post: xr.Dataset,
@@ -274,7 +328,7 @@ def plot_fire_score_plume(
         ax.scatter([], [], s=6, color="gray",
                    label=f"No FRP ({len(df_no_fire)})")
         ax.plot([], [], marker="*", color="gold", markersize=6,
-                markeredgecolor="k", linestyle="None", label="Source ?")
+                markeredgecolor="k", linestyle="None", label="Source")
         ax.legend(loc="lower left", fontsize=12)
 
     ax.set_title(f"S5P-PCA plumes — {col_var} — {date_str}", fontsize=14)
