@@ -263,7 +263,7 @@ def plot_fire_score_plume(
     band: Literal["SWIR", "MWIR"] = "SWIR",
     save_to: str | Path | None = None,
     figsize: tuple[int, int] = (18, 9),
-) -> Figure:
+) -> Figure | str:
     """
     Map 2 — Plume pixels coloured by per-plume fire score (log scale),
     with source-location stars.
@@ -281,6 +281,9 @@ def plot_fire_score_plume(
     """
     col_var   = f"fire_score_{band}_plume"
     cmap_name = "jet" if band == "SWIR" else "plasma"
+
+    if df_plumes.empty or col_var not in df_plumes.columns:
+        return "No data to plot"  # or raise an exception, or return an empty figure
 
     extent = _extent_from_ds(ds_combined)
     _, _, lat_2d, lon_2d, labels_2d, _, _ = _extract_grids(ds_combined, ds_post)

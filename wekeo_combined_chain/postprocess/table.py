@@ -38,12 +38,16 @@ def plume_table(
     threshold: int = TINY_PLUME_THRESHOLD,
 ) -> pd.DataFrame:
     """Plumes with ``label < threshold``."""
+    if df.empty or "label" not in df.columns:
+        return pd.DataFrame(columns=list(_COLUMN_MAP.values()))
     return _table(df[df["label"] < threshold].reset_index(drop=True), threshold)
 
-
+ 
 def tiny_plume_table(
     df: pd.DataFrame,
     threshold: int = TINY_PLUME_THRESHOLD,
 ) -> pd.DataFrame:
     """Tiny plumes with ``label >= threshold``."""
+    if df.empty or "label" not in df.columns:
+        return pd.DataFrame(columns=list(_COLUMN_MAP.values()))
     return _table(df[df["label"] >= threshold].reset_index(drop=True), threshold)

@@ -423,9 +423,14 @@ def build_grids(
     grid_conf_label_SWIR = np.zeros((height, width), dtype=np.int8)
     grid_conf_label_MWIR = np.zeros((height, width), dtype=np.int8)
 
-    label_to_row = df_plumes.set_index("label")
+    if df_plumes.empty:
+        label_to_row = pd.DataFrame()
+        lbl_iter: list = []
+    else:
+        label_to_row = df_plumes.set_index("label")
+        lbl_iter = list(df_plumes["label"].values)
 
-    for lbl in df_plumes["label"].values:
+    for lbl in lbl_iter:
         mask = (labels_2d == lbl)
         if not mask.any():
             continue
