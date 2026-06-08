@@ -94,6 +94,8 @@ def _base_map(extent: tuple[float, float, float, float], figsize=(18, 9)) -> tup
     ax.xaxis.set_major_formatter(LongitudeFormatter(zero_direction_label=True))
     ax.yaxis.set_major_formatter(LatitudeFormatter())
     ax.set_extent([lon_min, lon_max, lat_min, lat_max], crs=ccrs.PlateCarree())
+    fig.canvas.draw()
+    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
     return fig, ax
 
 
