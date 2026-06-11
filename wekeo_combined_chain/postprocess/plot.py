@@ -79,8 +79,8 @@ def _extent_from_ds(ds: xr.Dataset) -> tuple[float, float, float, float]:
 def _base_map(extent: tuple[float, float, float, float], figsize=(18, 9)) -> tuple[Figure, plt.Axes]:
     """Build a Cartopy PlateCarree figure constrained to *extent*."""
     lon_min, lon_max, lat_min, lat_max = extent
-    xticks = np.arange(np.floor(lon_min / 10) * 10, lon_max + 10, 10)
-    yticks = np.arange(np.floor(lat_min / 10) * 10, lat_max + 10, 10)
+    xticks = np.arange(np.floor(lon_min / 10) * 10, lon_max + 10, 20)
+    yticks = np.arange(np.floor(lat_min / 10) * 10, lat_max + 10, 20)
 
     fig = plt.figure(figsize=figsize)
     ax  = plt.axes(projection=ccrs.PlateCarree())
@@ -94,8 +94,6 @@ def _base_map(extent: tuple[float, float, float, float], figsize=(18, 9)) -> tup
     ax.xaxis.set_major_formatter(LongitudeFormatter(zero_direction_label=True))
     ax.yaxis.set_major_formatter(LatitudeFormatter())
     ax.set_extent([lon_min, lon_max, lat_min, lat_max], crs=ccrs.PlateCarree())
-    fig.canvas.draw()
-    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
     return fig, ax
 
 
@@ -130,60 +128,6 @@ def _maybe_save(fig: Figure, save_to: str | Path | None, dpi: int = 150) -> None
 # ---------------------------------------------------------------------------
 # Public plot functions
 # ---------------------------------------------------------------------------
-
-def plot_plumes(
-    ds_combined: xr.Dataset,
-    ds_post: xr.Dataset,
-    date_str: str,
-    save_to: str | Path | None = None,
-    figsize: tuple[int, int] = (18, 9),
-) -> Figure:
-    """
-    Map — Plume pixels coloured by label (no FRP overlay).
-
-    Parameters
-    ----------
-    ds_combined :
-        Raw combined input dataset.
-    ds_post :
-        Output of ``postprocess.compute()``.
-    date_str :
-        Date string used in the figure title, e.g. ``"20210817"``.
-    save_to :
-        File path to save the figure. ``None`` (default) skips saving.
-    figsize :
-        Figure size in inches.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-    """
-    extent = _extent_from_ds(ds_combined)
-    _, _, lat_2d, lon_2d, labels_2d, _, _ = _extract_grids(
-        ds_combined, ds_post)
-
-    fig, ax = _base_map(extent, figsize=figsize)
-
-    num_plumes = np.unique(labels_2d)
-    num_plumes = num_plumes[num_plumes != 0]
-    for i, lbl in enumerate(num_plumes):
-        mask = labels_2d == lbl
-        ax.scatter(lon_2d[mask], lat_2d[mask],
-                   s=2, color=_COLORS60[i % len(_COLORS60)], alpha=0.6,
-                   transform=ccrs.PlateCarree(), zorder=3)
-
-    ax.scatter([], [], s=6, color="steelblue", alpha=0.6,
-               transform=ccrs.PlateCarree(), label="Plumes S5P-PCA")
-    ax.set_title(
-        f"Plumes S5P-PCA ({len(num_plumes)}) — {date_str}",
-        fontsize=16,
-    )
-    ax.legend(loc="lower left", fontsize=14, markerscale=2)
-
-    _maybe_save(fig, save_to)
-    plt.close(fig)
-    return fig
-
 
 def plot_plumes_frp(
     ds_combined: xr.Dataset,
@@ -236,19 +180,48 @@ def plot_plumes_frp(
 
     num_plumes = np.unique(labels_2d)
     num_plumes = num_plumes[num_plumes != 0]
+    
+    # MAJ 11/06/2026 SP
+    
+    legend_handles = []
+    
+    # FRP handle
+    if n_plot_frp > 0:
+        legend_handles.append(
+            plt.scatter([], [], s=12, color="navy", marker="x", alpha=0.2,
+                        label=frp_label)
+        )
+    
     for i, lbl in enumerate(num_plumes):
         mask = labels_2d == lbl
+        n_pix = int(mask.sum())
+        color = _COLORS60[i % len(_COLORS60)]
         ax.scatter(lon_2d[mask], lat_2d[mask],
-                   s=2, color=_COLORS60[i % len(_COLORS60)], alpha=0.6,
+                   s=2, color=color, alpha=0.6,
                    transform=ccrs.PlateCarree(), zorder=3)
+        if lbl < 100:
+            legend_handles.append(
+                plt.scatter([], [], s=20, color=color, alpha=0.8,
+                            label=f"Plume {lbl} ({n_pix} px)"))
+        else:
+            legend_handles.append(
+                plt.scatter([], [], s=20, color=color, alpha=0.8,
+                            label=f"Tiny plume {lbl} ({n_pix} px)")
+        )   
+    ax.legend(handles=legend_handles, loc="lower left", fontsize=11, markerscale=1)
+    # for i, lbl in enumerate(num_plumes):
+    #     mask = labels_2d == lbl
+    #     ax.scatter(lon_2d[mask], lat_2d[mask],
+    #                s=2, color=_COLORS60[i % len(_COLORS60)], alpha=0.6,
+    #                transform=ccrs.PlateCarree(), zorder=3)
 
-    ax.scatter([], [], s=6, color="steelblue", alpha=0.6,
-               transform=ccrs.PlateCarree(), label="Plumes S5P-PCA")
-    ax.set_title(
-        f"Combination Plumes S5P-PCA ({len(num_plumes)}) × {frp_label} ({n_plot_frp}) — {date_str}",
-        fontsize=16,
-    )
-    ax.legend(loc="lower left", fontsize=14, markerscale=2)
+    # ax.scatter([], [], s=6, color="steelblue", alpha=0.6,
+    #            transform=ccrs.PlateCarree(), label="Plumes S5P-PCA")
+    # ax.set_title(
+    #     f"Combination Plumes S5P-PCA ({len(num_plumes)}) × {frp_label} ({n_plot_frp}) — {date_str}",
+    #     fontsize=16,
+    # )
+    # ax.legend(loc="lower left", fontsize=14, markerscale=2)
 
     _maybe_save(fig, save_to)
     plt.close(fig)
@@ -263,7 +236,7 @@ def plot_fire_score_plume(
     band: Literal["SWIR", "MWIR"] = "SWIR",
     save_to: str | Path | None = None,
     figsize: tuple[int, int] = (18, 9),
-) -> Figure | str:
+) -> Figure:
     """
     Map 2 — Plume pixels coloured by per-plume fire score (log scale),
     with source-location stars.
@@ -281,9 +254,6 @@ def plot_fire_score_plume(
     """
     col_var   = f"fire_score_{band}_plume"
     cmap_name = "jet" if band == "SWIR" else "plasma"
-
-    if df_plumes.empty or col_var not in df_plumes.columns:
-        return "No data to plot"  # or raise an exception, or return an empty figure
 
     extent = _extent_from_ds(ds_combined)
     _, _, lat_2d, lon_2d, labels_2d, _, _ = _extract_grids(ds_combined, ds_post)
@@ -333,7 +303,7 @@ def plot_fire_score_plume(
         ax.scatter([], [], s=6, color="gray",
                    label=f"No FRP ({len(df_no_fire)})")
         ax.plot([], [], marker="*", color="gold", markersize=6,
-                markeredgecolor="k", linestyle="None", label="Source")
+                markeredgecolor="k", linestyle="None", label="Potential source")
         ax.legend(loc="lower left", fontsize=12)
 
     ax.set_title(f"S5P-PCA plumes — {col_var} — {date_str}", fontsize=14)
@@ -489,17 +459,17 @@ def plot_plume_envelopes(
             has_frp = True
             ax.scatter(lon_2d[mask_ns], lat_2d[mask_ns],
                        s=12, c="navy", marker="x",
-                       transform=ccrs.PlateCarree(), zorder=20)
+                       transform=ccrs.PlateCarree(), alpha=0.4,zorder=20)
 
     legend_handles = [plt.scatter([], [], s=6, alpha=0.75, color=_PALETTE[0][0],
                                   label="Plumes S5P-PCA")]
     if has_envelope:
         legend_handles.append(
-            plt.scatter([], [], s=6, alpha=0.75, color=_PALETTE[0][1],
-                        marker="s", label="Search envelope"))
+            plt.plot([], [], alpha=0.75, color=_PALETTE[0][1],
+                        linestyle="dashed", label="Search envelope")[0])
     if has_frp:
         legend_handles.append(
-            plt.scatter([], [], s=12, color="navy", marker="x", label=frp_label))
+            plt.scatter([], [], s=12, color="navy", marker="x",alpha=0.4, label=frp_label))
     for lbl_conf, col_conf in [("high", "red"), ("low", "gold")]:
         legend_handles.append(
             plt.plot([], [], marker="*", color=col_conf, markersize=8,
