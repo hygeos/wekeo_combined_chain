@@ -44,6 +44,7 @@ matplotlib-base = "*"
 pytest-xdist = "*"
 xarray = "*"
 coda = "*"
+dask = "*"
 
 [tool.pixi.environments]
 default = { features = ['sys', 'sub', 'dev'], solve-group = "default" }
