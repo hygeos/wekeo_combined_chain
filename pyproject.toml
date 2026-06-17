@@ -38,6 +38,7 @@ tests = "pytest tests/"
 
 [tool.pixi.dependencies]
 ipykernel = "*"
+ipywidgets = "*"
 pytest = "*"
 pytest-html = "*"
 matplotlib-base = "*"
