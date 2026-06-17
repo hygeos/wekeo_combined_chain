@@ -184,8 +184,15 @@ def compute_plume_stats(
     swir_grid = frp_data.get("FRP_SWIR_no_SAA_mean", np.full(labels_2d.shape, np.nan))
     mwir_grid = frp_data.get("FRP_MWIR_mean",         np.full(labels_2d.shape, np.nan))
 
-    print(f"--> Active FRP cells (filtered): {frp_active_mask.sum()}")
-    print(f"--> {len(num_plumes)} plumes")
+# MAJ 11/06/2026 SP
+    print("==========================================")
+    print(" ** S5P-PCA/FRP combined analysis **")
+    print(f" - Active FRP cells (filtered): {frp_active_mask.sum()}")
+    print(f" - Total number of plumes to process: {len(num_plumes)}")
+    print("==========================================")
+
+    # print(f"--> Active FRP cells (filtered): {frp_active_mask.sum()}")
+    # print(f"--> {len(num_plumes)} plumes")
 
     rows = []
     n_confirmed = 0
@@ -214,8 +221,9 @@ def compute_plume_stats(
             buf_init, buf_max, max_extra_iter,
         )
 
-        print(f"--------------------------")
-        print(f"--> Plume {lbl}: buf_init={buf_init}  buf_final={buf}")
+        # MAJ SP 11/06/2026
+        # print(f"--------------------------")
+        # print(f"--> Plume {lbl}: buf_init={buf_init}  buf_final={buf}")
 
         frp_mask_strict = mask_plume & frp_active_mask
         frp_mask_env    = env_mask   & frp_active_mask
@@ -225,12 +233,28 @@ def compute_plume_stats(
         n_frp_env    = int(frp_mask_env.sum())
         n_frp_cells  = int(frp_mask_search.sum())
 
+        # MAJ SP 11/06/2026
+
+        # if n_frp_cells > 0:
+        #     print(f"** Plume {lbl} confirmed ** (strict={n_frp_strict}, env={n_frp_env})")
+        # else:
+        #     print(f"** Plume {lbl} alone **")
+
+
+        print("------------------------------------------")
+        print(f"--> Plume #{lbl}")
+        print("------------------------------------------")
+        print(f" Size         : {n_pix} pixels")
+        print(f" Search buffer: initial={buf_init}px -> final={buf}px")
+        print( "                (iteratively expanded to search for FRP)")
+        print()
         if n_frp_cells > 0:
-            print(f"** Plume {lbl} confirmed ** (strict={n_frp_strict}, env={n_frp_env})")
+            print(f" FRP data     : [FOUND] {n_frp_strict}px within plume, {n_frp_env}px in envelope")
         else:
-            print(f"** Plume {lbl} alone **")
+            print( " FRP data     : [NONE ] no FRP found within plume or envelope")
 
         # Aggregate FRP stats over search zone — v6.py lines ~485–500
+ 
         frp_stats: dict[str, float] = {}
         for var in frp_data:
             vals = frp_data[var][frp_mask_search]
@@ -283,8 +307,18 @@ def compute_plume_stats(
         conf_score_MWIR, conf_label_MWIR, _ = compute_source_confidence(
             src_MWIR_count, src_MWIR_sum, conf_max_dist_km)
 
-        print(f"   SWIR conf: {conf_label_SWIR} ({conf_score_SWIR}/2) | "
-              f"MWIR conf: {conf_label_MWIR} ({conf_score_MWIR}/2)")
+        # MAJ SP 11/06/2026
+        # print(f"   SWIR conf: {conf_label_SWIR} ({conf_score_SWIR}/2) | "
+        #       f"MWIR conf: {conf_label_MWIR} ({conf_score_MWIR}/2)")
+        
+        swir_localized = not np.isnan(src_SWIR_sum["source_lat"])
+        mwir_localized = not np.isnan(src_MWIR_sum["source_lat"])
+        print()
+        swir_tag = "[OK]" if swir_localized else "[--]"
+        mwir_tag = "[OK]" if mwir_localized else "[--]"
+        print(f" SWIR source  : {swir_tag} {'localized' if swir_localized else 'not localized':<15}  (confidence: {conf_score_SWIR}/2 - {conf_label_SWIR})")
+        print(f" MWIR source  : {mwir_tag} {'localized' if mwir_localized else 'not localized':<15}  (confidence: {conf_score_MWIR}/2 - {conf_label_MWIR})")
+        print("------------------------------------------")
 
         # Top-N cluster columns — v6.py lines ~576–590
         cluster_cols: dict[str, object] = {}
@@ -357,10 +391,19 @@ def compute_plume_stats(
         rows.append(row)
         if n_frp_cells > 0:
             n_confirmed += 1
-        print("--------------------------")
+        # print("--------------------------")
 
     df_plumes = pd.DataFrame(rows)
-    print(f"Plumes with FRP: {n_confirmed}")
+    # MAJ SP 11/06/2026
+    # print(f"Plumes with FRP: {n_confirmed}")
+    percent = round(n_confirmed / len(num_plumes) * 100) if len(num_plumes) > 0 else 0
+    print("==========================================")
+    print(" Complete Analysis ")
+    print(f" Total plumes       : {len(num_plumes)}")
+    print(f" Plumes with FRP    : {n_confirmed}  ({percent}%)")
+    print(f" Plumes without FRP : {len(num_plumes) - n_confirmed}")
+    print("==========================================")
+    
     return df_plumes
 
 
