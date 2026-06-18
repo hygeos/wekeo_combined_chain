@@ -5,7 +5,7 @@ description = ""
 requires-python = ">= 3.10"
 authors = [{name = "HYGEOS", email = "contact@hygeos.com"}]
 dependencies = [
-    "xarray"
+    "xarray",
     "dask",
     "s3fs",
     "zarr",
