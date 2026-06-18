@@ -6,6 +6,11 @@ requires-python = ">= 3.10"
 authors = [{name = "HYGEOS", email = "contact@hygeos.com"}]
 dependencies = [
     "xarray"
+    "dask",
+    "s3fs",
+    "zarr",
+    "ipykernel",
+    "ipywidgets",
 ]
 
 [project.optional-dependencies]
@@ -46,6 +51,8 @@ pytest-xdist = "*"
 xarray = "*"
 coda = "*"
 dask = "*"
+s3fs = "*"
+zarr = "*"
 
 [tool.pixi.environments]
 default = { features = ['sys', 'sub', 'dev'], solve-group = "default" }
