@@ -37,14 +37,20 @@ def _base_map(
     """Create a Cartopy PlateCarree figure constrained to *extent*."""
     proj = ccrs.PlateCarree()
     fig, ax = plt.subplots(figsize=figsize, subplot_kw={"projection": proj})
-    ax.set_extent(extent, crs=proj)
+    lon_min, lon_max, lat_min, lat_max = extent
+    is_global = (lon_max - lon_min) >= 350 and (lat_max - lat_min) >= 170
+    if is_global:
+        ax.set_global()
+    else:
+        ax.set_extent(extent, crs=proj)
     ax.add_feature(cf.COASTLINE, linewidth=0.6)
     ax.add_feature(cf.BORDERS, linewidth=0.4, linestyle="--")
-    gl = ax.gridlines(draw_labels=True, linewidth=0.3, alpha=0.5, linestyle="--")
-    gl.top_labels = False
-    gl.right_labels = False
-    gl.xformatter = LongitudeFormatter()
-    gl.yformatter = LatitudeFormatter()
+    gl = ax.gridlines(draw_labels=not is_global, linewidth=0.3, alpha=0.5, linestyle="--")
+    if not is_global:
+        gl.top_labels = False
+        gl.right_labels = False
+        gl.xformatter = LongitudeFormatter()
+        gl.yformatter = LatitudeFormatter()
     return fig, ax
 
 

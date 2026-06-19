@@ -93,7 +93,10 @@ def _base_map(extent: tuple[float, float, float, float], figsize=(18, 9)) -> tup
     ax.set_yticks(yticks, crs=ccrs.PlateCarree())
     ax.xaxis.set_major_formatter(LongitudeFormatter(zero_direction_label=True))
     ax.yaxis.set_major_formatter(LatitudeFormatter())
-    ax.set_extent([lon_min, lon_max, lat_min, lat_max], crs=ccrs.PlateCarree())
+    if (lon_max - lon_min) >= 350 and (lat_max - lat_min) >= 170:
+        ax.set_global()
+    else:
+        ax.set_extent([lon_min, lon_max, lat_min, lat_max], crs=ccrs.PlateCarree())
     return fig, ax
 
 

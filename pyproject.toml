@@ -6,11 +6,16 @@ requires-python = ">= 3.10"
 authors = [{name = "HYGEOS", email = "contact@hygeos.com"}]
 dependencies = [
     "xarray",
+    "numpy",
     "dask",
     "s3fs",
     "zarr",
     "ipykernel",
     "ipywidgets",
+    "dotenv",
+    "matplotlib",
+    "cartopy",
+    "netcdf4",
 ]
 
 [project.optional-dependencies]
