@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from wekeo_combined_chain.hygeos_core import env
 output_dir = env.getdir("OUTPUT_DIR")
 
@@ -8,4 +10,6 @@ gridded_combined_dir = output_dir / "gridded_combined"
 gridded_combined_dir.mkdir(parents=False, exist_ok=True)
 
 
-gridded_combined_downloaded_dir = env.getdir("DIR_DOWNLOAD_COMBINED")
+gridded_combined_downloaded_dir = env.getvar("DIR_DOWNLOAD_COMBINED", False)
+if gridded_combined_downloaded_dir:
+    gridded_combined_downloaded_dir = Path(gridded_combined_downloaded_dir)

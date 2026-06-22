@@ -5,7 +5,17 @@ description = ""
 requires-python = ">= 3.10"
 authors = [{name = "HYGEOS", email = "contact@hygeos.com"}]
 dependencies = [
-    "xarray"
+    "xarray",
+    "numpy",
+    "dask",
+    "s3fs",
+    "zarr",
+    "ipykernel",
+    "ipywidgets",
+    "dotenv",
+    "matplotlib",
+    "cartopy",
+    "netcdf4",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +48,7 @@ tests = "pytest tests/"
 
 [tool.pixi.dependencies]
 ipykernel = "*"
+ipywidgets = "*"
 pytest = "*"
 pytest-html = "*"
 matplotlib-base = "*"
@@ -45,6 +56,8 @@ pytest-xdist = "*"
 xarray = "*"
 coda = "*"
 dask = "*"
+s3fs = "*"
+zarr = "*"
 
 [tool.pixi.environments]
 default = { features = ['sys', 'sub', 'dev'], solve-group = "default" }
