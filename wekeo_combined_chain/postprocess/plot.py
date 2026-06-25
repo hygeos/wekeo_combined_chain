@@ -205,13 +205,15 @@ def plot_plumes_frp(
         if lbl < 100:
             legend_handles.append(
                 plt.scatter([], [], s=20, color=color, alpha=0.8,
-                            label=f"Plume {lbl} ({n_pix} px)"))
+                            label=f"Plume {lbl} ({n_pix} cells)"))
         else:
             legend_handles.append(
                 plt.scatter([], [], s=20, color=color, alpha=0.8,
-                            label=f"Tiny plume {lbl} ({n_pix} px)")
+                            label=f"Tiny plume {lbl} ({n_pix} cells)")
         )   
     ax.legend(handles=legend_handles, loc="lower left", fontsize=11, markerscale=1)
+    ax.set_title(date_str+' : S5P-PCA plumes x FRP ('+frp_channel+')', fontsize=14, fontweight='bold', pad=20)
+
     # for i, lbl in enumerate(num_plumes):
     #     mask = labels_2d == lbl
     #     ax.scatter(lon_2d[mask], lat_2d[mask],
@@ -307,7 +309,7 @@ def plot_fire_score_plume(
                    label=f"No FRP ({len(df_no_fire)})")
         ax.plot([], [], marker="*", color="gold", markersize=6,
                 markeredgecolor="k", linestyle="None", label="Potential source")
-        ax.legend(loc="lower left", fontsize=12)
+        ax.legend(loc="lower left", fontsize=14)
 
     ax.set_title(f"S5P-PCA plumes — {col_var} — {date_str}", fontsize=14)
 
@@ -357,7 +359,7 @@ def plot_fire_score_pixel(
                    f"× log(1 + FRP_{band}_energy_plume) (log scale)"),
         )
     ax.set_title(
-        f"S5P-PCA plumes — fire_score_{band} per pixel — {date_str}", fontsize=14)
+        f"S5P-PCA plumes — fire_score_{band} per cell — {date_str}", fontsize=14)
 
     _maybe_save(fig, save_to)
     plt.close(fig)
@@ -441,7 +443,7 @@ def plot_plume_envelopes(
             slat, slon = row[src_lat_count], row[src_lon_count]
             if (lon_min <= slon <= lon_max) and (lat_min <= slat <= lat_max):
                 has_src_count = True
-                ax.plot(slon, slat, marker="*", color=star_color, markersize=12,
+                ax.plot(slon, slat, marker="*", color=star_color, markersize=14,
                         markeredgecolor="k", markeredgewidth=0.5,
                         transform=ccrs.PlateCarree(), zorder=21)
 
@@ -449,7 +451,7 @@ def plot_plume_envelopes(
             slat, slon = row[src_lat_sum], row[src_lon_sum]
             if (lon_min <= slon <= lon_max) and (lat_min <= slat <= lat_max):
                 has_src_sum = True
-                ax.plot(slon, slat, marker="*", color=star_color, markersize=8,
+                ax.plot(slon, slat, marker="*", color=star_color, markersize=12,
                         markeredgecolor="k", markeredgewidth=0.5,
                         transform=ccrs.PlateCarree(), zorder=22)
 

@@ -244,7 +244,7 @@ def compute_plume_stats(
         print("------------------------------------------")
         print(f"--> Plume #{lbl}")
         print("------------------------------------------")
-        print(f" Size         : {n_pix} pixels")
+        print(f" Size         : {n_pix} cells")
         print(f" Search buffer: initial={buf_init}px -> final={buf}px")
         print( "                (iteratively expanded to search for FRP)")
         print()
@@ -526,7 +526,7 @@ def build_grids(
         data_vars[var] = xr.DataArray(
             grids_plume[var], dims=dims,
             attrs={"long_name": long_name, "units": units,
-                   "note": "Constant value over all pixels of the plume"},
+                   "note": "Constant value over all cells of the plume"},
         )
 
     data_vars["fire_score_SWIR"] = xr.DataArray(

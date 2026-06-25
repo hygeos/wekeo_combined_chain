@@ -21,7 +21,7 @@ TINY_PLUME_THRESHOLD = 100
 # MAJ 11/06/2026 SP
 _COLS_GENERAL = {
     "label"                  : "Plume label",
-    "n_pixels_plume"         : "Size (pixels)",
+    "n_pixels_plume"         : "Size (cells)",
     "centroid_lat_plume"     : "Centroid lat (deg)",
     "centroid_lon_plume"     : "Centroid lon (deg)",
     "n_frp_cells_total_plume": "FRP cells found",
