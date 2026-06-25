@@ -970,11 +970,11 @@ def plot_plume_total_combined_timeseries(
     """
     Combine le nombre total de plumes (normal + tiny) et le nombre total de pixels
     (normal + tiny) par jour, sous forme de barres, en 2 sous-graphiques empilés.
-    Ajoute le pourcentage de plumes confirmées (avec FRP) en axe secondaire
+    Ajoute le nombre de plumes confirmées (avec FRP) en axe secondaire
     sur le subplot du haut.
 
     Subplot 1 (haut) : nombre total de plumes par jour (barres)
-                        + % de plumes confirmées avec FRP (axe secondaire, courbe)
+                        + nombre de plumes confirmées avec FRP (axe secondaire, points)
     Subplot 2 (bas)  : nombre total de pixels par jour (barres)
 
     Parameters
@@ -982,10 +982,10 @@ def plot_plume_total_combined_timeseries(
     ds : xr.Dataset
         Dataset avec dimension 'time' et variable 's5p_pca__plume_labels'
     df_summary : pd.DataFrame
-        DataFrame indexé par date, doit contenir la colonne
-        '% of confirmed plumes (with FRP)'. Peut avoir un sous-ensemble
-        de dates différent de ds.time (les jours absents de df_summary
-        seront affichés sans valeur de % confirmé).
+        DataFrame indexé par date, doit contenir les colonnes
+        '% of confirmed plumes (with FRP)' et 'n_plumes'. Peut avoir un
+        sous-ensemble de dates différent de ds.time (les jours absents de
+        df_summary seront affichés sans valeur de plumes confirmées).
     figsize : Tuple[int, int], optional
         Taille de la figure, par défaut (12, 10)
     title : str, optional
@@ -1008,12 +1008,16 @@ def plot_plume_total_combined_timeseries(
     if pct_col not in df_summary.columns:
         raise ValueError(f"df_summary must contain column '{pct_col}'")
 
+    n_plumes_col = 'n_plumes'
+    if n_plumes_col not in df_summary.columns:
+        raise ValueError(f"df_summary must contain column '{n_plumes_col}'")
+
     plume_labels = ds['s5p_pca__plume_labels']
     times = ds.time.values
 
     total_plumes_count = []
     total_pixels_count = []
-    pct_confirmed = []
+    n_confirmed_plumes = []
 
     # Index de df_summary normalisé en date() pour le lookup
     # HYPOTHÈSE à vérifier : df_summary.index est de type datetime/Timestamp,
@@ -1040,18 +1044,20 @@ def plot_plume_total_combined_timeseries(
         mask_total = valid_labels_px > 0
         total_pixels_count.append(int(np.sum(mask_total)))
 
-        # --- % de plumes confirmées, si la date existe dans df_summary ---
+        # --- Nombre de plumes confirmées (avec FRP), si la date existe dans df_summary ---
         if day in df_summary_by_date:
-            pct_confirmed.append(df_summary_by_date[day][pct_col])
+            pct_val = df_summary_by_date[day][pct_col]
+            n_plumes_val = df_summary_by_date[day][n_plumes_col]
+            n_confirmed_plumes.append(pct_val * n_plumes_val / 100.0)
         else:
-            pct_confirmed.append(np.nan)
+            n_confirmed_plumes.append(np.nan)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize, sharex=True)
 
     x = np.arange(len(times))
     width = 0.6
 
-    # --- Subplot 1 : nombre total de plumes + % confirmé (axe secondaire) ---
+    # --- Subplot 1 : nombre total de plumes + nombre de plumes confirmées (axe secondaire) ---
     ax1.bar(x, total_plumes_count, width=width,
             color='#2E86AB', label='Total plumes (normal + tiny)')
     ax1.set_ylabel('Total Number of Plumes', fontsize=12, fontweight='bold')
@@ -1059,12 +1065,22 @@ def plot_plume_total_combined_timeseries(
     ax1.grid(True, alpha=0.3, linestyle='--', axis='y')
 
     ax1_pct = ax1.twinx()
-    ax1_pct.plot(x, pct_confirmed, marker='o',linestyle='None',
-                 color='crimson', label='% confirmed plumes (with FRP)')
-    ax1_pct.set_ylabel('% Confirmed Plumes (with FRP)', fontsize=11,
+    ax1_pct.plot(x, n_confirmed_plumes, marker='o', linestyle='None',
+                 color='crimson', label='Confirmed plumes (with FRP)')
+    ax1_pct.set_ylabel('Number of Confirmed Plumes (with FRP)', fontsize=11,
                         fontweight='bold', color='crimson')
-    ax1_pct.set_ylim(0, 105)
     ax1_pct.tick_params(axis='y', labelcolor='crimson')
+
+    # Échelle commune entre les deux axes pour une comparaison directe
+    max_val = max(
+        max(total_plumes_count) if len(total_plumes_count) > 0 else 0,
+        np.nanmax(n_confirmed_plumes) if not np.all(np.isnan(n_confirmed_plumes)) else 0,
+    )
+    y_top = int(np.ceil(max_val * 1.1)) if max_val > 0 else 1
+    ax1.set_ylim(0, y_top)
+    ax1_pct.set_ylim(0, y_top)
+    ax1.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    ax1_pct.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
 
     # Légende combinée des deux axes
     handles1, labels1 = ax1.get_legend_handles_labels()
