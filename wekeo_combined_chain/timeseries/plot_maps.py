@@ -299,24 +299,23 @@ def _run_animation(
     """
     Shared rendering engine.
 
-    Interactive mode: pre-renders every frame as a PNG byte-string once, then
-    uses an ``ipywidgets.Image`` widget that simply swaps bytes on slider/play
-    events — no Cartopy rebuild, no flicker.
+    Interactive mode pre-renders every frame as a PNG while reusing a single
+    Cartopy figure. This avoids rebuilding the map for every frame.
 
-    GIF mode: renders frames sequentially via ``FuncAnimation`` and writes a
-    Pillow GIF to *save_gif_path*.
+    GIF mode renders frames sequentially using FuncAnimation.
     """
     import io
     import matplotlib.animation as mpl_anim
-    from matplotlib.colors import Normalize
 
     times = ds.time.values
     n_days = len(times)
+
     extent = _extent_from_ds(ds)
     lon = ds["longitude"].values
     lat = ds["latitude"].values
+
     start_str = np.datetime_as_string(times[0], unit="D")
-    end_str   = np.datetime_as_string(times[-1], unit="D")
+    end_str = np.datetime_as_string(times[-1], unit="D")
 
     def _frame_title(day_str: str) -> str:
         return f"{label}  ·  {day_str}  [{start_str} → {end_str}]"
@@ -324,84 +323,184 @@ def _run_animation(
     # ------------------------------------------------------------------ GIF --
     if save_gif_path is not None:
         save_gif_path = Path(save_gif_path)
+
         fig, ax = _base_map(extent, figsize=figsize)
 
         im = ax.pcolormesh(
-            lon, lat, da.isel(time=0).values,
+            lon,
+            lat,
+            da.isel(time=0).values,
             transform=ccrs.PlateCarree(),
-            cmap=cmap, norm=norm, shading="auto",
+            cmap=cmap,
+            norm=norm,
+            shading="auto",
         )
-        cbar = fig.colorbar(im, ax=ax, orientation="vertical", pad=0.02, shrink=0.7)
+
+        cbar = fig.colorbar(
+            im,
+            ax=ax,
+            orientation="vertical",
+            pad=0.02,
+            shrink=0.7,
+        )
         cbar.set_label(cbar_label, fontsize=11)
-        title_obj = ax.set_title("", fontsize=13, fontweight="bold", pad=15)
+
+        title = ax.set_title("", fontsize=13, fontweight="bold", pad=15)
+
         plt.tight_layout()
 
-        def _update(frame: int):
+        def _update(frame):
             im.set_array(da.isel(time=frame).values.ravel())
-            title_obj.set_text(_frame_title(np.datetime_as_string(times[frame], unit="D")))
-            return [im, title_obj]
+            title.set_text(
+                _frame_title(
+                    np.datetime_as_string(times[frame], unit="D")
+                )
+            )
+            return (im, title)
 
         anim = mpl_anim.FuncAnimation(
-            fig, _update, frames=n_days, interval=1000 // fps, blit=False,
+            fig,
+            _update,
+            frames=n_days,
+            interval=1000 // fps,
+            blit=False,
         )
+
         save_gif_path.parent.mkdir(parents=True, exist_ok=True)
-        anim.save(save_gif_path, writer="pillow", fps=fps, dpi=dpi)
+        anim.save(
+            save_gif_path,
+            writer="pillow",
+            fps=fps,
+            dpi=dpi,
+        )
+
         plt.close(fig)
         print(f"GIF saved to: {save_gif_path}")
         return None
 
     # ------------------------------------------------ Pre-render PNG frames --
-    from ipywidgets import Play, IntSlider, HBox, VBox, Image as IpyImage, jslink
+    from ipywidgets import (
+        Play,
+        IntSlider,
+        HBox,
+        VBox,
+        Image as IpyImage,
+        jslink,
+    )
     from IPython.display import display
 
     print(f"Pre-rendering {n_days} frames…", end=" ", flush=True)
+
+    # Build the map only once
+    fig, ax = _base_map(extent, figsize=figsize)
+
+    im = ax.pcolormesh(
+        lon,
+        lat,
+        da.isel(time=0).values,
+        transform=ccrs.PlateCarree(),
+        cmap=cmap,
+        norm=norm,
+        shading="auto",
+    )
+
+    cbar = fig.colorbar(
+        im,
+        ax=ax,
+        orientation="vertical",
+        pad=0.02,
+        shrink=0.7,
+    )
+    cbar.set_label(cbar_label, fontsize=11)
+
+    title = ax.set_title("", fontsize=13, fontweight="bold", pad=15)
+
+    plt.tight_layout()
+
     frames: list[bytes] = []
+
     for i in range(n_days):
-        fig, ax = _base_map(extent, figsize=figsize)
-        im = ax.pcolormesh(
-            lon, lat, da.isel(time=i).values,
-            transform=ccrs.PlateCarree(),
-            cmap=cmap, norm=norm, shading="auto",
+        im.set_array(da.isel(time=i).values.ravel())
+
+        title.set_text(
+            _frame_title(
+                np.datetime_as_string(times[i], unit="D")
+            )
         )
-        cbar = fig.colorbar(im, ax=ax, orientation="vertical", pad=0.02, shrink=0.7)
-        cbar.set_label(cbar_label, fontsize=11)
-        day_str = np.datetime_as_string(times[i], unit="D")
-        ax.set_title(_frame_title(day_str), fontsize=13, fontweight="bold", pad=15)
-        plt.tight_layout()
+
         buf = io.BytesIO()
-        fig.savefig(buf, format="png", dpi=dpi, bbox_inches="tight")
-        plt.close(fig)
-        buf.seek(0)
-        frames.append(buf.read())
+        fig.savefig(
+            buf,
+            format="png",
+            dpi=dpi,
+            bbox_inches="tight",
+        )
+        frames.append(buf.getvalue())
+
+    plt.close(fig)
+
     print("done.")
 
-    img_widget = IpyImage(value=frames[0], format="png",
-                          layout={"max_width": "100%"})
+    img_widget = IpyImage(
+        value=frames[0],
+        format="png",
+        layout={"max_width": "100%"},
+    )
+
     play = Play(
-        value=0, min=0, max=n_days - 1, step=1,
+        value=0,
+        min=0,
+        max=n_days - 1,
+        step=1,
         interval=max(200, 1000 // fps),
         description="▶",
     )
+
     day_slider = IntSlider(
-        value=0, min=0, max=n_days - 1,
+        value=0,
+        min=0,
+        max=n_days - 1,
         description="Day",
         layout={"width": "500px"},
     )
+
     fps_slider = IntSlider(
-        value=fps, min=1, max=10, step=1,
+        value=fps,
+        min=1,
+        max=10,
+        step=1,
         description="FPS",
         layout={"width": "200px"},
     )
+
     jslink((play, "value"), (day_slider, "value"))
+
     day_slider.observe(
-        lambda change: setattr(img_widget, "value", frames[change["new"]]),
+        lambda change: setattr(
+            img_widget,
+            "value",
+            frames[change["new"]],
+        ),
         names="value",
     )
+
     fps_slider.observe(
-        lambda change: setattr(play, "interval", max(100, 1000 // change["new"])),
+        lambda change: setattr(
+            play,
+            "interval",
+            max(100, 1000 // change["new"]),
+        ),
         names="value",
     )
-    return display(VBox([HBox([play, day_slider, fps_slider]), img_widget]))
+
+    return display(
+        VBox(
+            [
+                HBox([play, day_slider, fps_slider]),
+                img_widget,
+            ]
+        )
+    )
 
 
 def animate_plume_map(
