@@ -13,7 +13,7 @@ dependencies = [
     "ipykernel",
     "ipywidgets",
     "dotenv",
-    "matplotlib",
+    "matplotlib<3.11",
     "cartopy",
     "netcdf4",
 ]
@@ -51,23 +51,10 @@ ipykernel = "*"
 ipywidgets = "*"
 pytest = "*"
 pytest-html = "*"
-matplotlib-base = "*"
+matplotlib-base = "<3.11"
 pytest-xdist = "*"
 xarray = "*"
 coda = "*"
 dask = "*"
 s3fs = "*"
 zarr = "*"
-
-[tool.pixi.environments]
-default = { features = ['sys', 'sub', 'dev'], solve-group = "default" }
-
-[tool.pixi.feature.sys.dependencies]
-
-[tool.pixi.feature.dev.dependencies]
-
-[tool.pixi.feature.sub.dependencies]
-xarray = "*"
-cartopy = "*"
-netcdf4 = "*"
-numpy = "*"
