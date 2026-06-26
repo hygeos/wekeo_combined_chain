@@ -5,6 +5,7 @@ from datetime import datetime, date
 import s3fs
 import xarray as xr
 
+from wekeo_combined_chain import config # loads config and env vars (AWS credentials) on import)
 from wekeo_combined_chain.utils import select_area
 
 
