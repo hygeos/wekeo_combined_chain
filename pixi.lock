@@ -3551,6 +3551,7 @@ packages:
   - matplotlib<3.11
   - cartopy
   - netcdf4
+  - scipy
   - wekeo-frp-l3[git] @ git+https://github.com/hygeos/wekeo_frp_l3 ; extra == 'git'
   - wekeo-iasi-l3[git] @ git+https://github.com/hygeos/wekeo_iasi_l3 ; extra == 'git'
   - wekeo-s5p-pca-l3[git] @ git+https://github.com/hygeos/wekeo_s5p_pca_l3 ; extra == 'git'
