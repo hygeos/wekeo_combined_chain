@@ -9,6 +9,11 @@ Wekeo Use Case Combined Processing Chain
 
 ## Preview
 
+    notebooks
+    ├── combined.ipynb      # demonstrate how to run the computations
+    ├── demo.ipynb          # demonstrate how to use the dataset from wekeo on a daily basis
+    └── demo_time.ipynb     # demonstrate how to use the dataset from wekoe on a time series basis
+
 ## Installation for Exploitation
 
 ### Clone the Repository
