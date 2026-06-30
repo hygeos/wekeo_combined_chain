@@ -11,7 +11,6 @@ Wekeo Use Case Combined Processing Chain
 
 ## Installation for Exploitation
 
-
 ### Clone the Repository
 ```bash
 git clone https://github.com/hygeos/wekeo_combined_chain.git
@@ -43,6 +42,7 @@ AWS_SECRET_ACCESS_KEY=
 AWS_DEFAULT_REGION=
 ```
 
+## NOTE: below are instructions which matters only for production / development !
 
 ## Installation for Production
 
@@ -60,7 +60,7 @@ conda install coda
 
 ## Installation for Development
 
-Made specifically for collaboration with Spascia.
+Made specifically for modifying the subchains while developping the combined chain
 
 ### Environments
 
@@ -86,17 +86,17 @@ conda create -n wekeo_env python=3.10 pip
 conda activate wekeo_env
 ```
 
-## Installation
+### Installation
 
 Once your environment is set up and activated, in a clean folder, proceed in the following order
 
-### 1. Clone the main repository
+#### 1. Clone the main repository
 
 ```bash
 git clone https://github.com/hygeos/wekeo_combined_chain.git
 ```
 
-### 2. Clone dependent repositories
+#### 2. Clone dependent repositories
 
 Clone the specific data chain repositories into the project directory:
 
@@ -107,7 +107,7 @@ git clone https://github.com/hygeos/wekeo_s5p_pca_l3
 git clone https://github.com/hygeos/wekeo_plumes_post_process
 ```
 
-### 3. Install packages in editable mode
+#### 3. Install packages in editable mode
 
 Install the chains in the python env as editable:
 
@@ -120,16 +120,16 @@ pip install -e wekeo_plumes_post_process
 ```
 
 
-### 4. Install the coda library for iasi
+#### 4. Install the coda library for iasi
 
-#### With conda
+##### With conda
 
 ```
 conda install coda
 ```
 
 
-### Resulting folder structure
+#### Resulting folder structure
 
 ```
 ├── wekeo_combined_chain
@@ -142,9 +142,11 @@ conda install coda
 
 Where each folder is installed as 'editable' in the python's environment, meaning that any changes inside will be reflected. 
 
-## Prerequisites
+## Production / Development Notes:
 
-### WEKEO HDA Credentials
+### Requirements
+
+#### WEKEO HDA Credentials
 You need to set up your WEKEO Harmonized Data Access (HDA) credentials in a file `~/.hdarc`
 
 Required syntax:
@@ -154,7 +156,7 @@ password:your_password
 ```
 
 
-### Environment Variables
+#### Environment Variables
 Create a `.env` file in the project root directory with the following environment variables: DIR_ANCILLARY, OUTPUT_DIR
 
 Example `.env` file:
@@ -167,28 +169,14 @@ DIR_DOWNLOAD_COMBINED=/data/WEKEO/downloaded/     (used for the demo.ipynb noteb
 
 These variables define paths for storing downloaded data and generated outputs. The directories will be created automatically if they don't exist.
 
-## Usage
+### Assessment
 
-The project includes a single Jupyter notebooks located in the `notebooks/` directory:
-
-The chain caches results automatically and retrieve disk results if already presents. (can be disabled)
-
-### combined.ipynb
-This notebook performs the total wekeo use case processing chain
-- s5p pca l3
-- frp slstr l3 (+ download)
-- iasi l3 (+ download)
-
-can be run in different configurations depending on the parameters
-    from wekeo_combined_chain.combined import get_combined_product
-    ds = get_combined_product(...) # run the processing chain, cf notebook for more info
-
-### Cache
+#### Cache
 
 Most of the computations include a parameter **use_cache** that will bypass the computation if the result is already present (based on the parameters). 
 So if you intend to modify the computations and test the result it is important to set **use_cache** to **False**. 
 
-### FRP download issues
+#### FRP download issues
 
 As of 02-04-2026 the download times for FRP have dramatically increased up to several hours for a single day.
 This is an issue on the server, we have contacted the platform about it, they are investigating it. There is unfortunately not much more we can do about it.
