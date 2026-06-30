@@ -9,7 +9,42 @@ Wekeo Use Case Combined Processing Chain
 
 ## Preview
 
-## Installation for Users
+## Installation for Exploitation
+
+
+### Clone the Repository
+```bash
+git clone https://github.com/hygeos/wekeo_combined_chain.git
+cd wekeo_combined_chain
+```
+
+### Install Environment
+Create the conda environment, install the project, and register the kernel:
+
+```bash
+# Create and activate the conda environment, then install the project
+conda create -n wekeo && conda activate wekeo && pip install -e .
+```
+
+### Setup Environment Variables (`.env`)
+
+Create a `.env` file at the root of the project and fill in your credentials:
+
+```bash
+touch .env
+```
+
+Add the following keys to the `.env` file (replace placeholders with your actual values):
+
+```ini
+OUTPUT_DIR=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=
+```
+
+
+## Installation for Production
 
 ```bash
 pip install ".[git]"
