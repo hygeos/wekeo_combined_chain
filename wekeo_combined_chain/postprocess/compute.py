@@ -103,13 +103,27 @@ def _load_arrays(ds: xr.Dataset) -> dict:
         else:
             frp_data[short] = np.full(labels_2d.shape, np.nan)
 
+    _swir_count = frp_data["FRP_SWIR_no_SAA_count"]
+    _mwir_count = frp_data["FRP_MWIR_count"]
+    # _count variables may have been stripped by remove_vars in s3_access; if so,
+    # fall back to using only the mean to detect active FRP cells.
+    swir_count_ok = (
+        np.ones(labels_2d.shape, dtype=bool)
+        if np.all(np.isnan(_swir_count))
+        else (_swir_count > 0)
+    )
+    mwir_count_ok = (
+        np.ones(labels_2d.shape, dtype=bool)
+        if np.all(np.isnan(_mwir_count))
+        else (_mwir_count > 0)
+    )
     swir_ok = (
-        (frp_data["FRP_SWIR_no_SAA_count"] > 0)
+        swir_count_ok
         & (frp_data["FRP_SWIR_no_SAA_mean"] > 0)
         & (~np.isnan(frp_data["FRP_SWIR_no_SAA_mean"]))
     )
     mwir_ok = (
-        (frp_data["FRP_MWIR_count"] > 0)
+        mwir_count_ok
         & (frp_data["FRP_MWIR_mean"] > 0)
         & (~np.isnan(frp_data["FRP_MWIR_mean"]))
     )
