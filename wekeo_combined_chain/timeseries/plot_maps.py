@@ -636,3 +636,48 @@ def animate_fire_map(
         save_gif_path=save_gif_path,
         fps=fps, dpi=dpi,
     )
+
+
+def animate_score_CO_map(
+    ds: xr.Dataset,
+    figsize: Tuple[int, int] = (18, 9),
+    save_gif_path: Optional[Union[str, Path]] = None,
+    fps: int = 2,
+    dpi: int = 100,
+):
+    """
+    Animate daily S5P-PCA CO score maps (``s5p_pca__mean_score_CO``).
+
+    Pixels with no value (NaN/Inf) are transparent.  The colorscale is fixed
+    across all frames using the 2nd–98th percentile of the full period so
+    relative intensities are comparable day-to-day.
+
+    Interactive mode shows a Play/loop widget + day slider + FPS control with
+    pre-rendered frames (no flicker).  Pass *save_gif_path* to export a GIF.
+    """
+    from matplotlib.colors import Normalize
+
+    var = "s5p_pca__mean_score_CO"
+
+    if var not in ds.data_vars:
+        raise ValueError(f"Dataset must contain '{var}'")
+    if "time" not in ds.dims:
+        raise ValueError("Dataset must have 'time' dimension")
+
+    da = ds[var].where(np.isfinite(ds[var]))  # NaN where not detected
+
+    # Consistent colorscale across the whole period
+    all_vals = da.values[np.isfinite(da.values)]
+    vmin = float(np.percentile(all_vals, 2))  if len(all_vals) else 0.0
+    vmax = float(np.percentile(all_vals, 98)) if len(all_vals) else 1.0
+    norm = Normalize(vmin=vmin, vmax=vmax)
+
+    return _run_animation(
+        ds, da,
+        label="S5P-PCA Mean CO Score",
+        cbar_label="Mean CO score (–)",
+        cmap="YlOrRd", norm=norm,
+        figsize=figsize,
+        save_gif_path=save_gif_path,
+        fps=fps, dpi=dpi,
+    )
